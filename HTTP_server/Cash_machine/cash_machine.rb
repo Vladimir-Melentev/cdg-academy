@@ -1,89 +1,44 @@
 class CashMachine
-  BALANCE = "./Files_txt/balance.txt".freeze
+  BALANCE = File.dirname(__FILE__) + "/Files_txt/balance.txt".freeze
   STARTING_BALANCE = 100
+    def initialize
+      read_balance
+    end
 
-  def self.init
-    new.run
-  end
+    def deposit(amount)
+      current_balance = read_balance
+      new_balance = current_balance + amount
+      write_balance(new_balance)
+      new_balance
+    end
 
-  def initialize
-    read_balance
-  end
-
-  def run
-    loop do
-      puts "\nWhat operation to use?"
-      puts "D - Deposit"
-      puts "W - Withdraw"
-      puts "B - Balance"
-      puts "Q - Quit"
-
-      choice = gets.chomp.upcase
-
-      case choice
-      when "D"
-        puts "Enter the deposit amount:"
-        deposit_amount = gets.chomp.to_i
-        if deposit_amount >= 0
-          deposit(deposit_amount)
-        else
-          puts "Amount must be greater than 0"
-        end
-      when "W"
-        puts "Enter the withdrawal amount:"
-        withdrawal_amount = gets.chomp.to_i
-        if withdrawal_amount >= 0
-          withdraw(withdrawal_amount)
-        elsif withdrawal_amount < 0
-          puts "Amount must be greater than 0"
-        else
-          puts "Insufficient funds"
-        end
-      when "B"
-        display_balance
-      when "Q"
-        puts "Goodbye! 'exit the program'"
-        display_balance
-        break
+    def withdraw(amount)
+      current_balance = read_balance
+      if current_balance >= amount
+        new_balance = current_balance - amount
+        write_balance(new_balance)
+        new_balance
       else
-        puts "Invalid choise. Please choose again"
+        "Insufficient funds"
       end
     end
-  end
 
-  private
-
-  def read_balance
-    if File.exist?(BALANCE)
-      File.read(BALANCE).to_i
-    else
-      File.write(BALANCE, STARTING_BALANCE.to_s)
-      STARTING_BALANCE
+    def balance
+      read_balance
     end
-  end
 
-  def deposit(amount)
-    current_balance = read_balance
-    new_balance = current_balance + amount
-    File.write(BALANCE, new_balance.to_s)
-    puts "Your balance: #{new_balance}"
-  end
+    private
 
-  def withdraw(amount)
-    current_balance = read_balance
-    if current_balance >= amount
-      new_balance = current_balance - amount
+   def read_balance
+      if File.exist?(BALANCE)
+        File.read(BALANCE).to_i
+      else
+        write_balance(STARTING_BALANCE)
+        STARTING_BALANCE
+      end
+    end
+
+    def write_balance(new_balance)
       File.write(BALANCE, new_balance.to_s)
-      puts "Your balance: #{new_balance}"
-    else
-      puts "Insufficient funds"
     end
   end
-
-  def display_balance
-    balance = read_balance
-    puts "Your balance: #{balance}"
-  end
-end
-
-CashMachine.init
